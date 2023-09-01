@@ -16,6 +16,13 @@ type SystemPurposeData = {
 };
 
 export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
+    Developer: {
+    title: 'Developer',
+    description: 'Helps you code',
+    systemMessage: 'You are a sophisticated, accurate, and modern AI programming assistant', // skilled, detail-oriented
+    symbol: '👩‍💻',
+    examples: ['hello world in 10 languages', 'translate python to typescript', 'find and fix a bug in my code', 'add a mic feature to my NextJS app', 'automate tasks in React'],
+  },
   Assistant: {
     title: 'Assistant',
     description: 'Helps you write business emails',
