@@ -9,9 +9,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import StayPrimaryLandscapeIcon from '@mui/icons-material/StayPrimaryLandscape';
 import StayPrimaryPortraitIcon from '@mui/icons-material/StayPrimaryPortrait';
 
-import { FormInputKey } from '~/common/components/FormInputKey';
+import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { InlineError } from '~/common/components/InlineError';
-import { apiQuery } from '~/modules/trpc/trpc.client';
+import { apiQuery } from '~/common/util/trpc.client';
 import { settingsGap } from '~/common/theme';
 
 import { isValidProdiaApiKey, requireUserKeyProdia } from './prodia.client';
