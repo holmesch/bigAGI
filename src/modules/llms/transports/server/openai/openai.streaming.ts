@@ -4,9 +4,9 @@ import { createParser as createEventsourceParser, EventSourceParser, ParsedEvent
 
 import { SERVER_DEBUG_WIRE, debugGenerateCurlCommand } from '~/server/wire';
 
-import { AnthropicWire } from './anthropic.wiretypes';
+import { AnthropicWire } from '../anthropic/anthropic.wiretypes';
 import { OpenAI } from './openai.wiretypes';
-import { anthropicAccess, anthropicAccessSchema, anthropicChatCompletionPayload } from './anthropic.router';
+import { anthropicAccess, anthropicAccessSchema, anthropicChatCompletionPayload } from '../anthropic/anthropic.router';
 import { openAIAccess, openAIAccessSchema, openAIChatCompletionPayload, openAIHistorySchema, openAIModelSchema } from './openai.router';
 
 
@@ -189,6 +189,8 @@ export async function openaiStreamingResponse(req: NextRequest): Promise<Respons
         break;
 
       case 'azure':
+      case 'localai':
+      case 'oobabooga':
       case 'openai':
       case 'openrouter':
         headersUrl = openAIAccess(access, model.id, '/v1/chat/completions');
