@@ -6,11 +6,12 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import IosShareIcon from '@mui/icons-material/IosShare';
 
-import { Brand } from '~/common/brand';
+import { Brand } from '~/common/app.config';
 import { ConfirmationModal } from '~/common/components/ConfirmationModal';
 import { Link } from '~/common/components/Link';
 import { apiAsyncNode } from '~/common/util/trpc.client';
 import { conversationTitle, useChatStore } from '~/common/state/store-chats';
+import { isBrowser } from '~/common/util/pwaUtils';
 import { useUICounter, useUIPreferencesStore } from '~/common/state/store-ui';
 
 import type { PublishedSchema, StoragePutSchema } from '../server/trade.router';
@@ -30,7 +31,7 @@ export type ExportConfig = { dir: 'export', conversationId: string | null };
 
 /// Returns a pretty link to the current page, for promo
 function linkToOrigin() {
-  let origin = (typeof window !== 'undefined') ? window.location.href : '';
+  let origin = isBrowser ? window.location.href : '';
   if (!origin || origin.includes('//localhost'))
     origin = Brand.URIs.OpenRepo;
   origin = origin.replace('https://', '');
