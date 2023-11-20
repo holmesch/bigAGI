@@ -8,14 +8,15 @@ import { DiagramConfig } from '~/modules/aifn/digrams/DiagramsModal';
 import { speakText } from '~/modules/elevenlabs/elevenlabs.client';
 import { useChatLLM } from '~/modules/llms/store-llms';
 
+import { GlobalShortcut, useGlobalShortcut } from '~/common/components/useGlobalShortcut';
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
 import { openLayoutPreferences } from '~/common/layout/store-applayout';
 import { useCapabilityElevenLabs, useCapabilityProdia } from '~/common/components/useCapabilities';
-import { useUIPreferencesStore } from '~/common/state/store-ui';
 
 import { ChatMessage } from './message/ChatMessage';
 import { CleanerMessage, MessagesSelectionHeader } from './message/CleanerMessage';
 import { PersonaSelector } from './persona-selector/PersonaSelector';
+import { useChatShowSystemMessages } from '../store-app-chat';
 
 
 /**
@@ -36,7 +37,7 @@ export function ChatMessageList(props: {
   const [selectedMessages, setSelectedMessages] = React.useState<Set<string>>(new Set());
 
   // external state
-  const showSystemMessages = useUIPreferencesStore(state => state.showSystemMessages);
+  const [showSystemMessages] = useChatShowSystemMessages();
   const { messages, editMessage, deleteMessage, historyTokenCount } = useChatStore(state => {
     const conversation = state.conversations.find(conversation => conversation.id === props.conversationId);
     return {
@@ -120,6 +121,10 @@ export function ChatMessageList(props: {
         deleteMessage(props.conversationId, selectedMessage);
     setSelectedMessages(new Set());
   };
+
+  useGlobalShortcut(props.isMessageSelectionMode && GlobalShortcut.Esc, false, false, false, () => {
+    props.setIsMessageSelectionMode(false);
+  });
 
 
   // text-diff functionality, find the messages to diff with

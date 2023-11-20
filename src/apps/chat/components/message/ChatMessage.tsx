@@ -27,12 +27,12 @@ import { InlineTextarea } from '~/common/components/InlineTextarea';
 import { KeyStroke } from '~/common/components/KeyStroke';
 import { Link } from '~/common/components/Link';
 import { SystemPurposeId, SystemPurposes } from '../../../../data';
-import { copyToClipboard } from '~/common/util/copyToClipboard';
+import { copyToClipboard } from '~/common/util/clipboardUtils';
 import { cssRainbowColorKeyframes } from '~/common/app.theme';
 import { prettyBaseModel } from '~/common/util/modelUtils';
 import { useUIPreferencesStore } from '~/common/state/store-ui';
 
-import { useChatMessageShowDiff } from '../../state/store-appchat';
+import { useChatShowTextDiff } from '../../store-app-chat';
 
 import { RenderCode } from './RenderCode';
 import { RenderHtml } from './RenderHtml';
@@ -197,7 +197,7 @@ export function ChatMessage(props: {
   message: DMessage,
   showDate?: boolean, diffPreviousText?: string,
   hideAvatars?: boolean, codeBackground?: string,
-  noMarkdown?: boolean, filterOnlyCode?: boolean,
+  noMarkdown?: boolean, diagramMode?: boolean,
   isBottom?: boolean, noBottomBorder?: boolean,
   isImagining?: boolean, isSpeaking?: boolean,
   onMessageDelete?: () => void,
@@ -223,7 +223,7 @@ export function ChatMessage(props: {
     renderMarkdown: state.renderMarkdown,
     doubleClickToEdit: state.doubleClickToEdit,
   }), shallow);
-  const [showDiff, setShowDiff] = useChatMessageShowDiff();
+  const [showDiff, setShowDiff] = useChatShowTextDiff();
   const textDiffs = useSanityTextDiffs(props.message.text, props.diffPreviousText, showDiff);
 
   // derived state
@@ -467,7 +467,10 @@ export function ChatMessage(props: {
             ...blockSx,
             flexGrow: 0,
             overflowX: 'auto',
-            ...(!!props.filterOnlyCode && { boxShadow: 'md' }),
+            ...(!!props.diagramMode && {
+              // width: '100%',
+              boxShadow: 'md',
+            }),
           }}>
 
           {props.showDate === true && (
@@ -489,13 +492,13 @@ export function ChatMessage(props: {
 
           {/* sequence of render components, for each Block */}
           {!errorMessage && parseBlocks(collapsedText, fromSystem, textDiffs)
-            .filter(block => block.type === 'code' || !props.filterOnlyCode)
+            .filter((block, _, blocks) => !props.diagramMode || block.type === 'code' || blocks.length === 1)
             .map(
               (block, index) =>
                 block.type === 'html'
                   ? <RenderHtml key={'html-' + index} htmlBlock={block} sx={codeSx} />
                   : block.type === 'code'
-                    ? <RenderCode key={'code-' + index} codeBlock={block} sx={codeSx} noCopyButton={props.filterOnlyCode} />
+                    ? <RenderCode key={'code-' + index} codeBlock={block} sx={codeSx} noCopyButton={props.diagramMode} />
                     : block.type === 'image'
                       ? <RenderImage key={'image-' + index} imageBlock={block} allowRunAgain={props.isBottom === true} onRunAgain={handleOpsRunAgain} />
                       : block.type === 'latex'
