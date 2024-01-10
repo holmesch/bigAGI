@@ -44,21 +44,25 @@ export function PageContainer(props: { currentApp?: NavItemApp, isMobile?: boole
   // external state
   const { isDrawerOpen } = useOptimaDrawers();
   const amplitude = useUIPreferencesStore(state =>
-    (isPwa() || props.isMobile) ? 'full' : state.centerMode,
+    (isPwa() || props.isMobile || props.currentApp?.fullWidth) ? 'full' : state.centerMode,
   );
 
   // mobile: no outer containers
   if (props.isMobile)
-    return <PageCore isMobile currentApp={props.currentApp}>
-      {props.children}
-    </PageCore>;
+    return (
+      <PageCore isMobile currentApp={props.currentApp}>
+        {props.children}
+      </PageCore>
+    );
 
   return (
 
+    // This wrapper widens the Container/PageCore when the drawer is closed
     <Box
       sx={{
         // full width (this is to the right of the fixed-size desktop drawer)
-        flex: 1,
+        flex: '1 1 0px',
+        overflow: 'hidden',
 
         // when the drawer is off, compensate with a negative margin
         // NOTE: this will cause a transition on the container as well, meaning when we

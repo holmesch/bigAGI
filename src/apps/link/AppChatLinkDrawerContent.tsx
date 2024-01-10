@@ -1,7 +1,7 @@
 import * as React from 'react';
 import TimeAgo from 'react-timeago';
 
-import { Box, ListDivider, ListItem, ListItemDecorator, MenuItem, Typography } from '@mui/joy';
+import { Box, ListDivider, ListItem, ListItemButton, ListItemDecorator, Typography } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import { useChatLinkItems } from '~/modules/trade/store-module-trade';
@@ -10,43 +10,46 @@ import { Brand } from '~/common/app.config';
 import { Link } from '~/common/components/Link';
 import { getChatLinkRelativePath, ROUTE_INDEX } from '~/common/app.routes';
 import { useOptimaDrawers } from '~/common/layout/optima/useOptimaDrawers';
+import { PageDrawerList } from '~/common/layout/optima/components/PageDrawerList';
 
 
 /**
  * Drawer Items are all the links already shared, for quick access.
  * This is stores in the Trade Store (local storage).
  */
-export function AppChatLinkDrawerItems() {
+export function AppChatLinkDrawerContent() {
 
   // external state
-  const { closeDrawer } = useOptimaDrawers();
+  const { closeDrawerOnMobile } = useOptimaDrawers();
   const chatLinkItems = useChatLinkItems()
     .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const notEmpty = chatLinkItems.length > 0;
 
-  return <>
+  return <PageDrawerList>
 
-    <MenuItem
-      onClick={closeDrawer}
-      component={Link} href={ROUTE_INDEX} noLinkStyle
-    >
-      <ListItemDecorator><ArrowBackIcon /></ListItemDecorator>
-      {Brand.Title.Base}
-    </MenuItem>
+    {notEmpty && (
+      <ListItemButton
+        onClick={closeDrawerOnMobile}
+        component={Link} href={ROUTE_INDEX} noLinkStyle
+      >
+        <ListItemDecorator><ArrowBackIcon /></ListItemDecorator>
+        {Brand.Title.Base}
+      </ListItemButton>
+    )}
 
     {notEmpty && <ListDivider />}
 
-    {notEmpty && <ListItem>
+    <ListItem>
       <Typography level='body-sm'>
-        Links shared by you
+        {notEmpty ? 'Links shared by you' : 'No prior shared links'}
       </Typography>
-    </ListItem>}
+    </ListItem>
 
     {notEmpty && <Box sx={{ overflowY: 'auto' }}>
       {chatLinkItems.map(item => (
 
-        <MenuItem
+        <ListItemButton
           key={'chat-link-' + item.objectId}
           component={Link} href={getChatLinkRelativePath(item.objectId)} noLinkStyle
           sx={{
@@ -60,10 +63,10 @@ export function AppChatLinkDrawerItems() {
           <Typography level='body-xs'>
             <TimeAgo date={item.createdAt} />
           </Typography>
-        </MenuItem>
+        </ListItemButton>
 
       ))}
     </Box>}
-  </>;
+  </PageDrawerList>;
 
 }

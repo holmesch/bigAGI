@@ -1,7 +1,7 @@
 # BIG-AGI 🧠✨
 
 Welcome to big-AGI 👋, the GPT application for professionals that need function, form,
-simplicity, and speed. Powered by the latest models from 8 vendors and
+simplicity, and speed. Powered by the latest models from 10 vendors and
 open-source model servers, `big-AGI` offers best-in-class Voice and Chat with AI Personas,
 visualizations, coding, drawing, calling, and quite more -- all in a polished UX.
 
@@ -20,6 +20,17 @@ shows the current developments and future ideas.
 
 - Got a suggestion? [_Add your roadmap ideas_](https://github.com/enricoros/big-agi/issues/new?&template=roadmap-request.md)
 - Want to contribute? [_Pick up a task!_](https://github.com/users/enricoros/projects/4/views/4) - _easy_ to _pro_
+
+### What's New in 1.10.0 · Jan 6, 2024 · The Year of AGI
+
+https://github.com/enricoros/big-AGI/assets/32999/fbb1be49-5c38-49c8-86fa-3705700f6c39
+
+- **New UI**: for both desktop and mobile, sets the stage for future scale. [#201](https://github.com/enricoros/big-AGI/issues/201)
+- **Conversation Folders**: enhanced conversation organization. [#321](https://github.com/enricoros/big-AGI/issues/321)
+- **[LM Studio](https://lmstudio.ai/)** support and improved token management
+- Resizable panes in split-screen conversations.
+- Large performance optimizations
+- Developer enhancements: new UI framework, updated documentation for proxy settings on browserless/docker
 
 ### What's New in 1.9.0 · Dec 28, 2023 · Creative Horizons
 

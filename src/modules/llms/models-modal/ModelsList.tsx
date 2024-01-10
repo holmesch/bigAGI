@@ -5,11 +5,11 @@ import { Box, Chip, IconButton, List, ListItem, ListItemButton, Typography } fro
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
-import { DLLM, DLLMId, DModelSourceId, useModelsStore } from '~/modules/llms/store-llms';
-import { IModelVendor } from '~/modules/llms/vendors/IModelVendor';
-import { findVendorById } from '~/modules/llms/vendors/vendors.registry';
-
 import { GoodTooltip } from '~/common/components/GoodTooltip';
+
+import { DLLM, DLLMId, DModelSourceId, useModelsStore } from '../store-llms';
+import { IModelVendor } from '../vendors/IModelVendor';
+import { findVendorById } from '../vendors/vendors.registry';
 
 
 function ModelItem(props: { llm: DLLM, vendor: IModelVendor, chipChat: boolean, chipFast: boolean, chipFunc: boolean, onClick: () => void }) {
@@ -23,10 +23,10 @@ function ModelItem(props: { llm: DLLM, vendor: IModelVendor, chipChat: boolean, 
   tooltip += ' - ';
   if (llm.contextTokens) {
     tooltip += llm.contextTokens.toLocaleString() + ' tokens';
-    // if (llm.maxOutputTokens)
-    //   tooltip += ' / ' + llm.maxOutputTokens.toLocaleString() + ' max';
+    if (llm.maxOutputTokens)
+      tooltip += ' / ' + llm.maxOutputTokens.toLocaleString() + ' max output tokens';
   } else
-    tooltip += 'unknown tokens size';
+    tooltip += 'token count not provided';
 
   return (
     <ListItem>

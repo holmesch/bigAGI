@@ -68,17 +68,18 @@ export function messageBackground(messageRole: DMessage['role'] | string, wasEdi
   }
 }
 
+const avatarIconSx = { width: 36, height: 36 };
+
 export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['role'] | string, messageOriginLLM: string | undefined, messagePurposeId: SystemPurposeId | undefined, messageSender: string, messageTyping: boolean, size: 'sm' | undefined = undefined): React.JSX.Element {
   if (typeof messageAvatar === 'string' && messageAvatar)
     return <Avatar alt={messageSender} src={messageAvatar} />;
-  const iconSx = { width: 40, height: 40 };
-  const mascotSx = size === 'sm' ? { width: 40, height: 40 } : { width: 64, height: 64 };
+  const mascotSx = size === 'sm' ? avatarIconSx : { width: 64, height: 64 };
   switch (messageRole) {
     case 'system':
-      return <SettingsSuggestIcon sx={iconSx} />;  // https://em-content.zobj.net/thumbs/120/apple/325/robot_1f916.png
+      return <SettingsSuggestIcon sx={avatarIconSx} />;  // https://em-content.zobj.net/thumbs/120/apple/325/robot_1f916.png
 
     case 'user':
-      return <Face6Icon sx={iconSx} />;            // https://www.svgrepo.com/show/306500/openai.svg
+      return <Face6Icon sx={avatarIconSx} />;            // https://www.svgrepo.com/show/306500/openai.svg
 
     case 'assistant':
       // typing gif (people seem to love this, so keeping it after april fools')
@@ -97,7 +98,7 @@ export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['
       // text-to-image: icon
       if (isTextToImage)
         return <FormatPaintIcon sx={{
-          ...iconSx,
+          ...avatarIconSx,
           animation: `${cssRainbowColorKeyframes} 1s linear 2.66`,
         }} />;
 
@@ -106,13 +107,15 @@ export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['
       if (symbol) return <Box sx={{
         fontSize: '24px',
         textAlign: 'center',
-        width: '100%', minWidth: `${iconSx.width}px`, lineHeight: `${iconSx.height}px`,
+        width: '100%',
+        minWidth: `${avatarIconSx.width}px`,
+        lineHeight: `${avatarIconSx.height}px`,
       }}>
         {symbol}
       </Box>;
 
       // default assistant avatar
-      return <SmartToyOutlinedIcon sx={iconSx} />; // https://mui.com/static/images/avatar/2.jpg
+      return <SmartToyOutlinedIcon sx={avatarIconSx} />; // https://mui.com/static/images/avatar/2.jpg
   }
   return <Avatar alt={messageSender} />;
 }
@@ -147,13 +150,14 @@ function explainErrorInMessage(text: string, isAssistant: boolean, modelId?: str
     </>;
   } else if (text.includes('"context_length_exceeded"')) {
     // TODO: propose to summarize or split the input?
-    const pattern = /maximum context length is (\d+) tokens.+you requested (\d+) tokens/;
+    const pattern = /maximum context length is (\d+) tokens.+resulted in (\d+) tokens/;
     const match = pattern.exec(text);
     const usedText = match ? <b>{parseInt(match[2] || '0').toLocaleString()} tokens &gt; {parseInt(match[1] || '0').toLocaleString()}</b> : '';
     errorMessage = <>
       This thread <b>surpasses the maximum size</b> allowed for {modelId || 'this model'}. {usedText}.
       Please consider removing some earlier messages from the conversation, start a new conversation,
       choose a model with larger context, or submit a shorter new message.
+      {!usedText && ` -- ${text}`}
     </>;
   }
   // [OpenAI] {"error":{"message":"Incorrect API key provided: ...","type":"invalid_request_error","param":null,"code":"invalid_api_key"}}
@@ -467,7 +471,7 @@ export function ChatMessage(props: {
         >
 
           {isHovering ? (
-            <IconButton variant='soft' color={fromAssistant ? 'neutral' : 'primary'}>
+            <IconButton variant='soft' color={fromAssistant ? 'neutral' : 'primary'} sx={avatarIconSx}>
               <MoreVertIcon />
             </IconButton>
           ) : (

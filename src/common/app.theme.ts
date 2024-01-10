@@ -69,11 +69,12 @@ export const appTheme = extendTheme({
         },
         background: {
           // New
+          popup: '#24292c', // 3: #32383E, 1: #171A1C, 2: #25282B
           surface: 'var(--joy-palette-neutral-800, #171A1C)',
           level1: 'var(--joy-palette-neutral-900, #0B0D0E)',
           level2: 'var(--joy-palette-neutral-800, #171A1C)',
-          body: 'var(--joy-palette-common-black, #000)',
-          // Former: surface [900] > level 1 [black], level 2 [800] > body [black]
+          body: '#060807',
+          // Former: popup > surface [900] > level 1 [black], level 2 [800] > body [black]
         },
       },
     },
@@ -128,8 +129,8 @@ export const themeBgAppChatComposer = 'background.surface';
 export const lineHeightChatText = 1.75;
 export const lineHeightTextarea = 1.75;
 
-export const themeZIndexDesktopDrawer = 25;
-export const themeZIndexPageBar = 26;
+export const themeZIndexPageBar = 25;
+export const themeZIndexDesktopDrawer = 26;
 export const themeZIndexDesktopNav = 27;
 
 export const themeBreakpoints = appTheme.breakpoints.values;

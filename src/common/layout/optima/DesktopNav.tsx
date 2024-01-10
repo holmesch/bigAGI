@@ -2,15 +2,19 @@ import * as React from 'react';
 import Router from 'next/router';
 
 import { Box, IconButton, styled, Tooltip } from '@mui/joy';
+import MenuIcon from '@mui/icons-material/Menu';
+
+import { useModelsStore } from '~/modules/llms/store-llms';
 
 import { AgiSquircleIcon } from '~/common/components/icons/AgiSquircleIcon';
-import { Link } from '~/common/components/Link';
 import { NavItemApp, navItems } from '~/common/app.nav';
-import { themeZIndexDesktopNav } from '~/common/app.theme';
+import { cssRainbowColorKeyframes, themeZIndexDesktopNav } from '~/common/app.theme';
 
 import { InvertedBar, InvertedBarCornerItem } from './components/InvertedBar';
 import { useOptimaDrawers } from './useOptimaDrawers';
 import { useOptimaLayout } from './useOptimaLayout';
+
+import { BringTheLove } from '~/common/layout/optima/components/BringTheLove';
 
 
 // Nav Group
@@ -39,6 +43,7 @@ const DesktopNavGroupButton = styled(Box)({
 const navItemClasses = {
   active: 'NavButton-active',
   paneOpen: 'NavButton-paneOpen',
+  attractive: 'NavButton-attractive',
 };
 
 const DesktopNavItem = styled(IconButton)(({ theme }) => ({
@@ -74,6 +79,12 @@ const DesktopNavItem = styled(IconButton)(({ theme }) => ({
     paddingRight: 0,
   },
 
+  // attractive: attract the user to click on this element
+  [`&.${navItemClasses.attractive}`]: {
+    animation: `${cssRainbowColorKeyframes} 5s infinite`,
+    transform: 'scale(1.4)',
+  },
+
 }));
 
 
@@ -87,6 +98,7 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
     showPreferencesTab, openPreferencesTab,
     showModelsSetup, openModelsSetup,
   } = useOptimaLayout();
+  const noLLMs = useModelsStore(state => !state.llms.length);
 
 
   // show/hide the pane when clicking on the logo
@@ -100,7 +112,7 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
 
   // App items
   const navAppItems = React.useMemo(() => {
-    return navItems.apps.map(item => {
+    return navItems.apps.filter(app => !app.hideNav /* .automatic */).map(item => {
       const isActive = item === props.currentApp;
       const isPanelable = isActive && !!item.drawer;
       const isPaneOpen = isPanelable && isDrawerOpen;
@@ -123,27 +135,19 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
 
   // External link items
   const navExtLinkItems = React.useMemo(() => {
-    return navItems.links.map(item => {
-      return (
-        <IconButton
-          size='sm'
-          key={'nav-ext-' + item.name}
-          component={Link}
-          href={item.href}
-          target='_blank'
-          sx={{
-            mb: 1,
-            opacity: 0.5,
-            transition: 'opacity 0.2s',
-            '&:hover': {
-              opacity: 1,
-            },
-          }}
-        >
-          <item.icon />
-        </IconButton>
-      );
-    });
+    return navItems.links.map((item, index) =>
+      <BringTheLove
+        key={'nav-ext-' + item.name}
+        asIcon
+        text={item.name}
+        icon={item.icon}
+        link={item.href}
+        sx={{
+          p: 1,
+          mb: index > 0 ? 1 : 0,
+        }}
+      />,
+    );
   }, []);
 
 
@@ -159,19 +163,22 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
       };
       const { isActive, showModal } = stateActionMap[item.overlayId] ?? stateActionMap[0];
 
+      // attract the attention to the models configuration when no LLMs are available (a bit hardcoded here)
+      const isAttractive = noLLMs && item.overlayId === 'models';
+
       return (
-        <Tooltip followCursor key={'n-m-' + item.overlayId} title={item.name}>
+        <Tooltip followCursor key={'n-m-' + item.overlayId} title={isAttractive ? 'Add Language Models - REQUIRED' : item.name}>
           <DesktopNavItem
             variant={isActive ? 'soft' : undefined}
             onClick={showModal}
-            className={`${isActive ? navItemClasses.active : ''}`}
+            className={`${isActive ? navItemClasses.active : ''} ${isAttractive ? navItemClasses.attractive : ''}`}
           >
             <item.icon />
           </DesktopNavItem>
         </Tooltip>
       );
     });
-  }, [openModelsSetup, openPreferencesTab, showModelsSetup, showPreferencesTab]);
+  }, [noLLMs, openModelsSetup, openPreferencesTab, showModelsSetup, showPreferencesTab]);
 
 
   return (
@@ -180,7 +187,7 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
       <InvertedBarCornerItem>
         <Tooltip title={isDrawerOpen ? 'Close' : 'Open Drawer'}>
           <DesktopNavItem disabled={!logoButtonTogglesPane} onClick={handleLogoButtonClick}>
-            <AgiSquircleIcon inverted sx={{/* animation: `${cssRainbowColorKeyframes} 15s linear infinite` */ }} />
+            {logoButtonTogglesPane ? <MenuIcon /> : <AgiSquircleIcon inverted sx={{ color: 'white' }} />}
           </DesktopNavItem>
         </Tooltip>
       </InvertedBarCornerItem>
@@ -190,7 +197,7 @@ export function DesktopNav(props: { currentApp?: NavItemApp }) {
       </DesktopNavGroupButton>
 
       <DesktopNavGroupButton>
-        {/*{navExtLinkItems}*/}
+        {navExtLinkItems}
         {navModalItems}
       </DesktopNavGroupButton>
 

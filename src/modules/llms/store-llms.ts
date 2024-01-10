@@ -17,8 +17,8 @@ export interface DLLM<TSourceSetup = unknown, TLLMOptions = unknown> {
   description: string;
   tags: string[]; // UNUSED for now
   // modelcaps: DModelCapability[];
-  contextTokens: number;
-  maxOutputTokens: number;
+  contextTokens: number | null;     // null: must assume it's unknown
+  maxOutputTokens: number | null;   // null: must assume it's unknown
   hidden: boolean; // hidden from Chat model UI selectors
 
   // temporary special flags - not graduated yet
@@ -163,9 +163,23 @@ export const useModelsStore = create<LlmsStore>()(
 
 
       addSource: (source: DModelSource) =>
-        set(state => ({
-          sources: [...state.sources, source],
-        })),
+        set(state => {
+
+          // re-number all sources for the given vendor
+          let n = 0;
+          const sourceVId = source.vId;
+
+          return {
+            sources: [...state.sources, source].map(_source =>
+              _source.vId != sourceVId
+                ? _source
+                : {
+                  ..._source,
+                  label: _source.label.replace(/ #\d+$/, '') + (++n > 1 ? ` #${n}` : ''),
+                },
+            ),
+          };
+        }),
 
       removeSource: (id: DModelSourceId) =>
         set(state => {
@@ -207,11 +221,11 @@ export const useModelsStore = create<LlmsStore>()(
       version: 1,
       migrate: (state: any, fromVersion: number): LlmsStore => {
 
-        // 0 -> 1: add 'maxOutputTokens' where missing,
-        if (state && fromVersion === 0)
+        // 0 -> 1: add 'maxOutputTokens' where missing
+        if (state && fromVersion < 1)
           for (const llm of state.llms)
-            if (!llm.maxOutputTokens)
-              llm.maxOutputTokens = Math.round((llm.contextTokens || 4096) / 2);
+            if (llm.maxOutputTokens === undefined)
+              llm.maxOutputTokens = llm.contextTokens ? Math.round(llm.contextTokens / 2) : null;
 
         return state;
       },
@@ -238,6 +252,10 @@ export const useModelsStore = create<LlmsStore>()(
     }),
 );
 
+
+export const getChatLLMId = (): DLLMId | null => useModelsStore.getState().chatLLMId;
+
+export const getFastLLMId = (): DLLMId | null => useModelsStore.getState().fastLLMId;
 
 export function findLLMOrThrow<TSourceSetup, TLLMOptions>(llmId: DLLMId): DLLM<TSourceSetup, TLLMOptions> {
   const llm = useModelsStore.getState().llms.find(llm => llm.id === llmId);
@@ -276,8 +294,15 @@ function findLlmIdBySuffix(llms: DLLM[], suffixes: string[], fallbackToFirst: bo
     for (const llm of llms)
       if (llm.id.endsWith(suffix))
         return llm.id;
+  if (!fallbackToFirst) return null;
+
+  // otherwise return first that's not hidden
+  for (const llm of llms)
+    if (!llm.hidden)
+      return llm.id;
+
   // otherwise return first id
-  return fallbackToFirst ? llms[0].id : null;
+  return llms[0].id;
 }
 
 

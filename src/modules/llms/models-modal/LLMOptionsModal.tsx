@@ -6,13 +6,13 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-import { DLLMId, useModelsStore } from '~/modules/llms/store-llms';
-import { findVendorById } from '~/modules/llms/vendors/vendors.registry';
-
 import { FormLabelStart } from '~/common/components/forms/FormLabelStart';
 import { GoodModal } from '~/common/components/GoodModal';
 import { GoodTooltip } from '~/common/components/GoodTooltip';
 import { settingsGap } from '~/common/app.theme';
+
+import { DLLMId, useModelsStore } from '../store-llms';
+import { findVendorById } from '../vendors/vendors.registry';
 
 
 function VendorLLMOptions(props: { llmId: DLLMId }) {
@@ -133,11 +133,11 @@ export function LLMOptionsModal(props: { id: DLLMId, onClose: () => void }) {
             {llm.description}
           </Typography>}
           <Typography level='body-xs'>
-            {!!llm.contextTokens && `context tokens: ${llm.contextTokens.toLocaleString()} · `}
-            {!!llm.maxOutputTokens && `max output tokens: ${llm.maxOutputTokens.toLocaleString()}`}<br />
+            context tokens: <b>{llm.contextTokens ? llm.contextTokens.toLocaleString() : 'not provided'}</b>{` · `}
+            max output tokens: <b>{llm.maxOutputTokens ? llm.maxOutputTokens.toLocaleString() : 'not provided'}</b><br />
             {!!llm.created && `created: ${(new Date(llm.created * 1000)).toLocaleString()} · `}
             {/*· tags: {llm.tags.join(', ')}*/}
-            {JSON.stringify(llm.options)}
+            config: {JSON.stringify(llm.options)}
           </Typography>
         </Box>}
       </FormControl>
