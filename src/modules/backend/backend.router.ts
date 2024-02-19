@@ -4,7 +4,7 @@ import type { BackendCapabilities } from '~/modules/backend/state-backend';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
-import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.router.fetchers';
 
 import { analyticsListCapabilities } from './backend.analytics';
 
@@ -22,7 +22,7 @@ export const backendRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       analyticsListCapabilities(ctx.hostName);
       return {
-        hasDB: !!env.POSTGRES_PRISMA_URL && !!env.POSTGRES_URL_NON_POOLING,
+        hasDB: (!!env.MDB_URI)||(!!env.POSTGRES_PRISMA_URL && !!env.POSTGRES_URL_NON_POOLING),
         hasBrowsing: !!env.PUPPETEER_WSS_ENDPOINT,
         hasGoogleCustomSearch: !!env.GOOGLE_CSE_ID && !!env.GOOGLE_CLOUD_API_KEY,
         hasImagingProdia: !!env.PRODIA_API_KEY,
@@ -33,6 +33,7 @@ export const backendRouter = createTRPCRouter({
         hasLlmOllama: !!env.OLLAMA_API_HOST,
         hasLlmOpenAI: !!env.OPENAI_API_KEY || !!env.OPENAI_API_HOST,
         hasLlmOpenRouter: !!env.OPENROUTER_API_KEY,
+        hasLlmPerplexity: !!env.PERPLEXITY_API_KEY,
         hasLlmTogetherAI: !!env.TOGETHERAI_API_KEY,
         hasVoiceElevenLabs: !!env.ELEVENLABS_API_KEY,
       } satisfies BackendCapabilities;

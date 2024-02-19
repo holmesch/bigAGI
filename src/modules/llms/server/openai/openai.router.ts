@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
-import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.router.fetchers';
 
 import { t2iCreateImagesOutputSchema } from '~/modules/t2i/t2i.server.types';
 
@@ -11,12 +11,13 @@ import { Brand } from '~/common/app.config';
 import { fixupHost } from '~/common/util/urlUtils';
 
 import { OpenAIWire, WireOpenAICreateImageOutput, wireOpenAICreateImageOutputSchema, WireOpenAICreateImageRequest } from './openai.wiretypes';
-import { azureModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, togetherAIModelsToModelDescriptions } from './models.data';
+import { azureModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, perplexityAIModelDescriptions, togetherAIModelsToModelDescriptions } from './models.data';
 import { llmsChatGenerateWithFunctionsOutputSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
+import { wilreLocalAIModelsApplyOutputSchema, wireLocalAIModelsAvailableOutputSchema, wireLocalAIModelsListOutputSchema } from './localai.wiretypes';
 
 
 const openAIDialects = z.enum([
-  'azure', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'openai', 'openrouter', 'togetherai',
+  'azure', 'lmstudio', 'localai', 'mistral', 'oobabooga', 'openai', 'openrouter', 'perplexity', 'togetherai',
 ]);
 
 export const openAIAccessSchema = z.object({
@@ -132,6 +133,10 @@ export const llmOpenAIRouter = createTRPCRouter({
         return { models };
       }
 
+      // [Perplexity]: there's no API for models listing (upstream: https://docs.perplexity.ai/discuss/65cf7fd19ac9a5002e8f1341)
+      if (access.dialect === 'perplexity')
+        return { models: perplexityAIModelDescriptions() };
+
 
       // [non-Azure]: fetch openAI-style for all but Azure (will be then used in each dialect)
       const openAIWireModelsResponse = await openaiGET<OpenAIWire.Models.Response>(access, '/v1/models');
@@ -190,8 +195,18 @@ export const llmOpenAIRouter = createTRPCRouter({
 
             // custom OpenAI sort
             .sort((a, b) => {
-              // due to model name, sorting doesn't require special cases anymore
-              return b.label.localeCompare(a.label);
+
+              // fix the OpenAI model names to be chronologically sorted
+              function remapReleaseDate(id: string): string {
+                return id
+                  .replace('0314', '230314')
+                  .replace('0613', '230613')
+                  .replace('1106', '231106')
+                  .replace('0125', '240125');
+              }
+
+              // due to using by-label, sorting doesn't require special cases anymore
+              return remapReleaseDate(b.label).localeCompare(remapReleaseDate(a.label));
 
               // move models with the link emoji (🔗) to the bottom
               // const aLink = a.label.includes('🔗');
@@ -316,6 +331,41 @@ export const llmOpenAIRouter = createTRPCRouter({
       }
     }),
 
+
+  /// Dialect-specific procedures ///
+
+  /* [LocalAI] List all Model Galleries */
+  dialectLocalAI_galleryModelsAvailable: publicProcedure
+    .input(listModelsInputSchema)
+    .query(async ({ input: { access } }) => {
+      const wireLocalAIModelsAvailable = await openaiGET(access, '/models/available');
+      return wireLocalAIModelsAvailableOutputSchema.parse(wireLocalAIModelsAvailable);
+    }),
+
+  /* [LocalAI] Download a model from a Model Gallery */
+  dialectLocalAI_galleryModelsApply: publicProcedure
+    .input(z.object({
+      access: openAIAccessSchema,
+      galleryName: z.string(),
+      modelName: z.string(),
+    }))
+    .mutation(async ({ input: { access, galleryName, modelName } }) => {
+      const galleryModelId = `${galleryName}@${modelName}`;
+      const wireLocalAIModelApply = await openaiPOST(access, null, { id: galleryModelId }, '/models/apply');
+      return wilreLocalAIModelsApplyOutputSchema.parse(wireLocalAIModelApply);
+    }),
+
+  /* [LocalAI] Poll for a Model download Job status */
+  dialectLocalAI_galleryModelsJob: publicProcedure
+    .input(z.object({
+      access: openAIAccessSchema,
+      jobId: z.string(),
+    }))
+    .query(async ({ input: { access, jobId } }) => {
+      const wireLocalAIModelsJobs = await openaiGET(access, `/models/jobs/${jobId}`);
+      return wireLocalAIModelsListOutputSchema.parse(wireLocalAIModelsJobs);
+    }),
+
 });
 
 
@@ -323,6 +373,7 @@ const DEFAULT_HELICONE_OPENAI_HOST = 'oai.hconeai.com';
 const DEFAULT_MISTRAL_HOST = 'https://api.mistral.ai';
 const DEFAULT_OPENAI_HOST = 'api.openai.com';
 const DEFAULT_OPENROUTER_HOST = 'https://openrouter.ai/api';
+const DEFAULT_PERPLEXITY_HOST = 'https://api.perplexity.ai';
 const DEFAULT_TOGETHERAI_HOST = 'https://api.together.xyz';
 
 export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | null, apiPath: string): { headers: HeadersInit, url: string } {
@@ -437,6 +488,25 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
         },
         url: orHost + apiPath,
       };
+
+    case 'perplexity':
+      const perplexityKey = access.oaiKey || env.PERPLEXITY_API_KEY || '';
+      const perplexityHost = fixupHost(access.oaiHost || DEFAULT_PERPLEXITY_HOST, apiPath);
+      if (!perplexityKey || !perplexityHost)
+        throw new Error('Missing Perplexity API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+
+      if (apiPath.startsWith('/v1'))
+        apiPath = apiPath.replace('/v1', '');
+
+      return {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${perplexityKey}`,
+        },
+        url: perplexityHost + apiPath,
+      };
+
 
     case 'togetherai':
       const togetherKey = access.oaiKey || env.TOGETHERAI_API_KEY || '';

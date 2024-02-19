@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { createParser as createEventsourceParser, EventSourceParseCallback, EventSourceParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser';
 
-import { createEmptyReadableStream, debugGenerateCurlCommand, safeErrorString, SERVER_DEBUG_WIRE, serverFetchOrThrow } from '~/server/wire';
+import { createEmptyReadableStream, debugGenerateCurlCommand, nonTrpcServerFetchOrThrow, safeErrorString, SERVER_DEBUG_WIRE } from '~/server/wire';
 
 
 // Anthropic server imports
@@ -99,6 +99,7 @@ export async function llmStreamingRelayHandler(req: NextRequest): Promise<Respon
       case 'oobabooga':
       case 'openai':
       case 'openrouter':
+      case 'perplexity':
       case 'togetherai':
         requestAccess = openAIAccess(access, model.id, '/v1/chat/completions');
         body = openAIChatCompletionPayload(model, history, null, null, 1, true);
@@ -110,7 +111,7 @@ export async function llmStreamingRelayHandler(req: NextRequest): Promise<Respon
       console.log('-> streaming:', debugGenerateCurlCommand('POST', requestAccess.url, requestAccess.headers, body));
 
     // POST to our API route
-    upstreamResponse = await serverFetchOrThrow(requestAccess.url, 'POST', requestAccess.headers, body);
+    upstreamResponse = await nonTrpcServerFetchOrThrow(requestAccess.url, 'POST', requestAccess.headers, body);
 
   } catch (error: any) {
     const fetchOrVendorError = safeErrorString(error) + (error?.cause ? ' · ' + error.cause : '');
