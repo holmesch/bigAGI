@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type SystemPurposeId =  'Custom' | '金融分析師' | 'Generic' |'六叔英釋中' | '六叔中釋英';
+export type SystemPurposeId =  'Developer' | 'Custom' | '金融分析師' | 'Generic' |'六叔英釋中' | '六叔中釋英';
 
 export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
 
@@ -36,7 +36,13 @@ export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
     call: { starters: ['你想什麼由中文轉英文?'] },
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
-
+  Developer: {
+    title: 'Developer',
+    description: 'Helps you code',
+    systemMessage: 'You are a sophisticated, accurate, and modern AI programming assistant', // skilled, detail-oriented
+    examples: ['hello world in 10 languages', 'translate python to typescript', 'find and fix a bug in my code', 'add a mic feature to my NextJS app', 'automate tasks in React'],
+    call: { starters: ['Dev here. Got code?', 'Developer on call. What\'s the issue?', 'Ready to code.', 'Hello.'] },
+  },
   金融分析師: {
     title: '金融分析師',
     description: '中文經濟及金融分析師',
