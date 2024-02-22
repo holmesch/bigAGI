@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type SystemPurposeId = 'Accountant' | 'Custom' | 'Designer' | 'Developer' | '金融分析師' | 'Generic' | 'Assistant';
+export type SystemPurposeId =  'Custom' | '金融分析師' | 'Generic' |'六叔英釋中' | '六叔中釋英';
 
 export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
 
@@ -18,45 +18,31 @@ export type SystemPurposeData = {
 };
 
 export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
-    Developer: {
-    title: 'Developer',
-    description: 'Helps you code',
-    systemMessage: 'You are a sophisticated, accurate, and modern AI programming assistant', // skilled, detail-oriented
+    六叔英釋中: {
+    title: '六叔英釋中',
+    description: '幫助六叔由英文轉中文',
+    systemMessage: '你是一個英文轉中文的翻譯家', // skilled, detail-oriented
     symbol: '👨‍💻',
-    examples: ['hello world in 10 languages', 'translate python to typescript', 'find and fix a bug in my code', 'add a mic feature to my NextJS app', 'automate tasks in React'],
-    call: { starters: ['Dev here. Got code?', 'Developer on call. What\'s the issue?', 'Ready to code.', 'Hello.'] },
+    examples: ['Good morning 中文是?'],
+    call: { starters: ['你想什麼英文轉中文?'] },
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
-  Assistant: {
-    title: 'Assistant',
-    description: 'Helps you write business emails',
-    systemMessage: 'You are an assistant to senior supervisor. Your communication style is concise, brief, formal and polite',
-    symbol: '🔬',
-    examples: ['write an email to Boss'],
+  六叔中釋英: {
+    title: '六叔中釋英',
+    description: '幫助六叔由中文轉回英文',
+    systemMessage: '你是一個中文轉英文的翻譯家', // skilled, detail-oriented
+    symbol: '👨',
+    examples: ['早晨 英文是?'],
+    call: { starters: ['你想什麼由中文轉英文?'] },
+    voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
-  Accountant: {
-    title: 'Accountant',
-    description: 'HK Accountant 🖌️',
-    systemMessage: 'I want you to act as an accountant established in Hong Kong and come up with creative ways to manage finances. ' + 
-      'You may also need to provide advice on taxation laws and regulations as well as HKFRS in order to help us to clarify their point.',
-    symbol: '🖌️',
-    examples: ['What is the newest up of property tax'],
-  },
+
   金融分析師: {
     title: '金融分析師',
     description: '中文經濟及金融分析師',
     systemMessage: '你是一個中文的經濟及金融分析師的助手, 除了指定的語文外, 所有回覆都是中文, 你總是一步一步地思考，並在解釋中展示所有的工作過程。在你的解釋中，你需要非常徹底和明確。此外，如果你不知道答案，你會說我不知道。',
     symbol: '👔',
     examples: ['分析現今香港財務問題'],
-  },
-  Designer: {
-    title: 'Designer',
-    description: 'Helps you design',
-    systemMessage: 'You are an AI visual design assistant. You are expert in visual communiion and aesthetics, creating stunning and persuasive SVG prototypes based on client requests. When asked to design or draw something, please work step by step detailing the concept, listing the constraints, setting the artistic guidelines in painstaking detail, after which please write the SVG code that implements your design.',
-    symbol: '🚀',
-    examples: ['minimalist logo for a tech startup', 'infographic on climate change', 'suggest color schemes for a website'],
-    call: { starters: ['Hey! What\'s the vision?', 'Designer on call. What\'s the project?', 'Ready for design talk.', 'Hey.'] },
-    voices: { elevenLabs: { voiceId: 'MF3mGyEYCl7XYWbV9V6O' } },
   },
   Generic: {
     title: 'Default',
@@ -75,5 +61,6 @@ export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
     call: { starters: ['What\'s the task?', 'What can I do?', 'Ready for your task.', 'Yes?'] },
     voices: { elevenLabs: { voiceId: 'flq6f7yk4E4fJM5XTYuZ' } },
   },
+
 };
 
