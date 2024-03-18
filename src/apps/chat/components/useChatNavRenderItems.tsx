@@ -1,13 +1,12 @@
 import { shallow } from 'zustand/shallow';
 
 import type { DFolder } from '~/common/state/store-folders';
-import { conversationTitle, DConversationId, useChatStore } from '~/common/state/store-chats';
+import { conversationTitle, DConversationId, DMessageUserFlag, messageHasUserFlag, messageUserFlagToEmoji, useChatStore } from '~/common/state/store-chats';
 
 import type { ChatNavigationItemData } from './ChatDrawerItem';
 
 
 // configuration
-const AUTO_UNDERLINE_COUNT = 40;
 const SEARCH_MIN_CHARS = 3;
 
 
@@ -78,7 +77,9 @@ export function useChatNavRenderItems(
   filterByQuery: string,
   activeFolder: DFolder | null,
   allFolders: DFolder[],
+  filterHasStars: boolean,
   grouping: ChatNavGrouping,
+  showRelativeSize: boolean,
 ): {
   renderNavItems: ChatRenderItemData[],
   filteredChatIDs: DConversationId[],
@@ -97,39 +98,48 @@ export function useChatNavRenderItems(
       const isSearching = lcTextQuery.length >= SEARCH_MIN_CHARS;
 
       // transform (the conversations into ChatNavigationItemData) + filter2 (if searching)
-      const chatNavItems = selectedConversations.map((_c): ChatNavigationItemData => {
-        // rich properties
-        const title = conversationTitle(_c);
-        const isAlsoOpen = findOpenInViewNumbers(chatPanesConversationIds, _c.id);
+      const chatNavItems = selectedConversations
+        .filter(_c => !filterHasStars || _c.messages.some(m => messageHasUserFlag(m, 'starred')))
+        .map((_c): ChatNavigationItemData => {
+          // rich properties
+          const title = conversationTitle(_c);
+          const isAlsoOpen = findOpenInViewNumbers(chatPanesConversationIds, _c.id);
 
-        // set the frequency counters if filtering is enabled
-        let searchFrequency: number = 0;
-        if (isSearching) {
-          const titleFrequency = title.toLowerCase().split(lcTextQuery).length - 1;
-          const messageFrequency = _c.messages.reduce((count, message) => count + (message.text.toLowerCase().split(lcTextQuery).length - 1), 0);
-          searchFrequency = titleFrequency + messageFrequency;
-        }
+          // set the frequency counters if filtering is enabled
+          let searchFrequency: number = 0;
+          if (isSearching) {
+            const titleFrequency = title.toLowerCase().split(lcTextQuery).length - 1;
+            const messageFrequency = _c.messages.reduce((count, message) => count + (message.text.toLowerCase().split(lcTextQuery).length - 1), 0);
+            searchFrequency = titleFrequency + messageFrequency;
+          }
 
-        // create the ChatNavigationData
-        return {
-          type: 'nav-item-chat-data',
-          conversationId: _c.id,
-          isActive: _c.id === activeConversationId,
-          isAlsoOpen,
-          isEmpty: !_c.messages.length && !_c.userTitle,
-          title,
-          folder: !allFolders.length
-            ? undefined                             // don't show folder select if folders are disabled
-            : _c.id === activeConversationId        // only show the folder for active conversation(s)
-              ? allFolders.find(folder => folder.conversationIds.includes(_c.id)) ?? null
-              : null,
-          updatedAt: _c.updated || _c.created || 0,
-          messageCount: _c.messages.length,
-          assistantTyping: !!_c.abortController,
-          systemPurposeId: _c.systemPurposeId,
-          searchFrequency,
-        };
-      }).filter(item => !isSearching || item.searchFrequency > 0);
+          // union of message flags -> emoji string
+          const allFlags = new Set<DMessageUserFlag>();
+          _c.messages.forEach(_m => _m.userFlags?.forEach(flag => allFlags.add(flag)));
+          const userFlagsSummary = !allFlags.size ? undefined : Array.from(allFlags).map(messageUserFlagToEmoji).join('');
+
+          // create the ChatNavigationData
+          return {
+            type: 'nav-item-chat-data',
+            conversationId: _c.id,
+            isActive: _c.id === activeConversationId,
+            isAlsoOpen,
+            isEmpty: !_c.messages.length && !_c.userTitle,
+            title,
+            userFlagsSummary,
+            folder: !allFolders.length
+              ? undefined                             // don't show folder select if folders are disabled
+              : _c.id === activeConversationId        // only show the folder for active conversation(s)
+                ? allFolders.find(folder => folder.conversationIds.includes(_c.id)) ?? null
+                : null,
+            updatedAt: _c.updated || _c.created || 0,
+            messageCount: _c.messages.length,
+            assistantTyping: !!_c.abortController,
+            systemPurposeId: _c.systemPurposeId,
+            searchFrequency,
+          };
+        })
+        .filter(item => !isSearching || item.searchFrequency > 0);
 
       // check if the active conversation has an item in the list
       const filteredChatsIncludeActive = chatNavItems.some(_c => _c.conversationId === activeConversationId);
@@ -179,13 +189,18 @@ export function useChatNavRenderItems(
 
       // [empty message] if there are no items
       if (!renderNavItems.length)
-        renderNavItems.push({ type: 'nav-item-info-message', message: isSearching ? 'No results found' : 'No conversations in folder' });
+        renderNavItems.push({
+          type: 'nav-item-info-message',
+          message: filterHasStars ? 'No starred results'
+            : isSearching ? 'No results found'
+              : 'No conversations in folder',
+        });
 
       // other derived state
       const filteredChatIDs = chatNavItems.map(_c => _c.conversationId);
       const filteredChatsCount = chatNavItems.length;
       const filteredChatsAreEmpty = !filteredChatsCount || (filteredChatsCount === 1 && chatNavItems[0].isEmpty);
-      const filteredChatsBarBasis = (filteredChatsCount >= AUTO_UNDERLINE_COUNT || isSearching)
+      const filteredChatsBarBasis = ((showRelativeSize && filteredChatsCount >= 2) || isSearching)
         ? chatNavItems.reduce((longest, _c) => Math.max(longest, isSearching ? _c.searchFrequency : _c.messageCount), 1)
         : 0;
 
@@ -202,7 +217,10 @@ export function useChatNavRenderItems(
       // we only compare the renderNavItems array, which shall be changed if the rest changes
       return a.renderNavItems.length === b.renderNavItems.length
         && a.renderNavItems.every((_a, i) => shallow(_a, b.renderNavItems[i]))
-        && shallow(a.filteredChatIDs, b.filteredChatIDs);
+        && shallow(a.filteredChatIDs, b.filteredChatIDs)
+        && a.filteredChatsAreEmpty === b.filteredChatsAreEmpty
+        && a.filteredChatsBarBasis === b.filteredChatsBarBasis
+        && a.filteredChatsIncludeActive === b.filteredChatsIncludeActive;
     },
   );
 }

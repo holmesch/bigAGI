@@ -14,7 +14,8 @@ const shortcutsMd = platformAwareKeystrokes(`
 | **Edit**            |                                                 | 
 | Shift + Enter       | Newline                                         |
 | Alt + Enter         | Append (no response)                            |
-| Ctrl + Shift + R    | Regenerate answer                               |
+| Ctrl + Shift + B    | **Beam** last message                           |
+| Ctrl + Shift + R    | **Regenerate** last message                     |
 | Ctrl + Shift + V    | Attach clipboard (better than Ctrl + V)         |
 | Ctrl + M            | Microphone (voice typing)                       |
 | **Chats**           |                                                 | 
@@ -47,7 +48,7 @@ export function ShortcutsModal(props: { onClose: () => void }) {
         text={shortcutsMd}
         fromRole='assistant'
         contentScaling='sm'
-        isMobile={isMobile}
+        fitScreen={isMobile}
         renderTextAsMarkdown
       />
     </GoodModal>

@@ -2,92 +2,30 @@ import * as React from 'react';
 import { StaticImageData } from 'next/image';
 
 import { SxProps } from '@mui/joy/styles/types';
-import { Box, Button, Card, CardContent, Chip, Grid, Typography } from '@mui/joy';
+import { Box, Chip, SvgIconProps, Typography } from '@mui/joy';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import GoogleIcon from '@mui/icons-material/Google';
 import LaunchIcon from '@mui/icons-material/Launch';
+
+import { AnthropicIcon } from '~/common/components/icons/vendors/AnthropicIcon';
+import { GroqIcon } from '~/common/components/icons/vendors/GroqIcon';
+import { LocalAIIcon } from '~/common/components/icons/vendors/LocalAIIcon';
+import { MistralIcon } from '~/common/components/icons/vendors/MistralIcon';
+import { PerplexityIcon } from '~/common/components/icons/vendors/PerplexityIcon';
 
 import { Brand } from '~/common/app.config';
 import { Link } from '~/common/components/Link';
 import { clientUtmSource } from '~/common/util/pwaUtils';
 import { platformAwareKeystrokes } from '~/common/components/KeyStroke';
 
+
 // Images
-// An image of a capybara sculpted entirely from black cotton candy, set against a minimalist backdrop with splashes of bright, contrasting sparkles. The capybara is calling on a 3D origami old-school pink telephone and the camera is zooming on the telephone. Close up photography, bokeh, white background.
+// An image of a capybara sculpted entirely from iridescent blue cotton candy, gazing into a holographic galaxy of floating AI model icons (representing various AI models like Perplexity, Groq, etc.). The capybara is wearing a lightweight, futuristic headset, and its paws are gesturing as if orchestrating the movement of the models in the galaxy. The backdrop is minimalist, with occasional bursts of neon light beams, creating a sense of depth and wonder. Close-up photography, bokeh effect, with a dark but vibrant background to make the colors pop.
+import coverV114 from '../../../public/images/covers/release-cover-v1.14.0.png';
+// An image of a capybara sculpted entirely from black cotton candy, set against a minimalist backdrop with splashes of bright, contrasting sparkles. The capybara is using a computer with split screen made of origami, split keyboard and is wearing origami sunglasses with very different split reflections. Split halves are very contrasting. Close up photography, bokeh, white background.
 import coverV113 from '../../../public/images/covers/release-cover-v1.13.0.png';
+// An image of a capybara sculpted entirely from black cotton candy, set against a minimalist backdrop with splashes of bright, contrasting sparkles. The capybara is calling on a 3D origami old-school pink telephone and the camera is zooming on the telephone. Close up photography, bokeh, white background.
 import coverV112 from '../../../public/images/covers/release-cover-v1.12.0.png';
-
-
-// update this variable every time you want to broadcast a new version to clients
-export const incrementalVersion: number = 13;
-
-
-const wowStyle: SxProps = {
-  textDecoration: 'underline',
-  textDecorationThickness: '0.4em',
-  textDecorationColor: 'rgba(var(--joy-palette-primary-lightChannel) / 1)',
-  // textDecorationColor: 'rgba(0 255 0 / 0.5)',
-  textDecorationSkipInk: 'none',
-  // textUnderlineOffset: '-0.5em',
-};
-
-function B(props: {
-  // one-of
-  href?: string,
-  issue?: number,
-  code?: string,
-
-  wow?: boolean,
-  children: React.ReactNode
-}) {
-  const href =
-    props.issue ? `${Brand.URIs.OpenRepo}/issues/${props.issue}`
-      : props.code ? `${Brand.URIs.OpenRepo}/blob/main/${props.code}`
-        : props.href;
-  const boldText = (
-    <Typography component='span' color={!!href ? 'primary' : 'neutral'} sx={{ fontWeight: 600 }}>
-      {props.children}
-    </Typography>
-  );
-  if (!href)
-    return boldText;
-  return (
-    <Link href={href + clientUtmSource()} target='_blank' sx={props.wow ? wowStyle : undefined}>
-      {boldText} <LaunchIcon sx={{ mx: 0.5, fontSize: 16 }} />
-    </Link>
-  );
-}
-
-
-// callout, for special occasions
-export const newsRoadmapCallout =
-  <Card variant='solid' invertedColors>
-    <CardContent sx={{ gap: 2 }}>
-      <Typography level='title-lg'>
-        Open Roadmap
-      </Typography>
-      <Typography level='body-sm'>
-        Take a peek at our roadmap to see what&apos;s in the pipeline.
-        Discover upcoming features and let us know what excites you the most!
-      </Typography>
-      <Grid container spacing={1}>
-        <Grid xs={12} sm={7}>
-          <Button
-            fullWidth variant='soft' color='primary' endDecorator={<LaunchIcon />}
-            component={Link} href={Brand.URIs.OpenProject} noLinkStyle target='_blank'
-          >
-            Explore
-          </Button>
-        </Grid>
-        <Grid xs={12} sm={5} sx={{ display: 'flex', flexAlign: 'center', justifyContent: 'center' }}>
-          <Button
-            fullWidth variant='plain' color='primary' endDecorator={<LaunchIcon />}
-            component={Link} href={Brand.URIs.OpenRepo + '/issues/new?template=roadmap-request.md&title=%5BSuggestion%5D'} noLinkStyle target='_blank'
-          >
-            Suggest a Feature
-          </Button>
-        </Grid>
-      </Grid>
-    </CardContent>
-  </Card>;
 
 
 interface NewsItem {
@@ -98,15 +36,43 @@ interface NewsItem {
   versionCoverImage?: StaticImageData;
   text?: string | React.JSX.Element;
   items?: {
-    text: string | React.JSX.Element;
+    text: React.ReactNode;
     dev?: boolean;
     issue?: number;
+    icon?: React.FC<SvgIconProps>;
   }[];
 }
 
 // news and feature surfaces
 export const NewsItems: NewsItem[] = [
-  // still unannounced: screen capture (when removed from labs)
+  /*{
+    versionCode: '1.15.0',
+    items: [
+      Beam
+      Draw
+      ...
+      Screen Capture (when removed from labs)
+    ]
+  }*/
+  {
+    versionCode: '1.14.1',
+    versionName: 'Modelmorphic',
+    versionCoverImage: coverV114,
+    versionDate: new Date('2024-03-07T08:00:00Z'),
+    items: [
+      { text: <>Anthropic <B href='https://www.anthropic.com/news/claude-3-family'>Claude-3</B> support for smarter chats</>, issue: 443, icon: AnthropicIcon },
+      { text: <><B issue={407}>Perplexity</B> support, including Online models</>, issue: 407, icon: PerplexityIcon },
+      { text: <><B issue={427}>Groq</B> support, with speeds up to 500 tok/s</>, issue: 427, icon: GroqIcon },
+      { text: <>Support for new Mistral-Large models</>, icon: MistralIcon },
+      { text: <>Support for Google Gemini 1.5 models and various improvements</>, icon: GoogleIcon as any },
+      { text: <>Deeper LocalAI integration including support for <B issue={411}>model galleries</B></>, icon: LocalAIIcon },
+      { text: <>Major <B href='https://twitter.com/enricoros/status/1756553038293303434'>performance optimizations</B>: runs faster, saves power, saves memory</> },
+      { text: <>Improvements: auto-size charts, search and folder experience</> },
+      { text: <>Perfect chat scaling, with rapid keyboard shortcuts</> },
+      { text: <>Also: diagrams auto-resize, open code with StackBlitz and JSFiddle, quick model visibility toggle, open links externally, docs on the web</> },
+      { text: <>Fixes: standalone LaTeX blocks, close views by dragging, knowledge cutoff dates, crashes on Google translate (thanks dad)</> },
+    ],
+  },
   {
     versionCode: '1.13.0',
     versionName: 'Multi + Mind',
@@ -210,7 +176,7 @@ export const NewsItems: NewsItem[] = [
     items: [
       { text: <>New <B issue={251} wow>attachments system</B>: drag, paste, link, snap, images, text, pdfs</> },
       { text: <>Desktop <B issue={253}>webcam access</B> for direct image capture (Labs option)</> },
-      { text: <>Independent browsing with <B code='/docs/config-browse.md'>Browserless</B> support</> },
+      { text: <>Independent browsing with <B code='/docs/config-feature-browse.md'>Browserless</B> support</> },
       { text: <><B issue={256}>Overheat</B> LLMs with higher temperature limits</> },
       { text: <>Enhanced security via <B code='/docs/deploy-authentication.md'>password protection</B></> },
       { text: <>{platformAwareKeystrokes('Ctrl+Shift+O')}: quick access to model options</> },
@@ -223,7 +189,7 @@ export const NewsItems: NewsItem[] = [
     versionName: 'Surf\'s Up',
     versionDate: new Date('2023-11-28T21:00:00Z'),
     items: [
-      { text: <><B issue={237} wow>Web Browsing</B> support, see the <B code='/docs/config-browse.md'>browsing user guide</B></> },
+      { text: <><B issue={237} wow>Web Browsing</B> support, see the <B code='/docs/config-feature-browse.md'>browsing user guide</B></> },
       { text: <><B issue={235}>Branching Discussions</B> at any message</> },
       { text: <><B issue={207}>Keyboard Navigation</B>: use {platformAwareKeystrokes('Ctrl+Shift+Left/Right')} to navigate chats</> },
       { text: <><B issue={236}>UI fixes</B> (thanks to the first sponsor)</> },
@@ -240,7 +206,7 @@ export const NewsItems: NewsItem[] = [
     items: [
       { text: <><B issue={190} wow>Continued Voice</B> for hands-free interaction</> },
       { text: <><B issue={192}>Visualization</B> Tool for data representations</> },
-      { text: <><B code='/docs/config-ollama.md'>Ollama (guide)</B> local models support</> },
+      { text: <><B code='/docs/config-local-ollama.md'>Ollama (guide)</B> local models support</> },
       { text: <><B issue={194}>Text Tools</B> including highlight differences</> },
       { text: <><B href='https://mermaid.js.org/'>Mermaid</B> Diagramming Rendering</> },
       { text: <><B>OpenAI 1106</B> Chat Models</> },
@@ -290,3 +256,41 @@ export const NewsItems: NewsItem[] = [
     ],
   },
 ];
+
+
+const wowStyle: SxProps = {
+  textDecoration: 'underline',
+  textDecorationThickness: '0.4em',
+  textDecorationColor: 'rgba(var(--joy-palette-primary-lightChannel) / 1)',
+  // textDecorationColor: 'rgba(0 255 0 / 0.5)',
+  textDecorationSkipInk: 'none',
+  // textUnderlineOffset: '-0.5em',
+};
+
+function B(props: {
+  // one-of
+  href?: string,
+  issue?: number,
+  code?: string,
+
+  wow?: boolean,
+  children: React.ReactNode
+}) {
+  const href =
+    props.issue ? `${Brand.URIs.OpenRepo}/issues/${props.issue}`
+      : props.code ? `${Brand.URIs.OpenRepo}/blob/main/${props.code}`
+        : props.href;
+  const isExtIcon = !props.issue;
+  const boldText = (
+    <Typography component='span' color={!!href ? 'primary' : 'neutral'} sx={{ fontWeight: 'lg' }}>
+      {props.children}
+    </Typography>
+  );
+  if (!href)
+    return boldText;
+  return (
+    <Link href={href + clientUtmSource()} target='_blank' sx={props.wow ? wowStyle : undefined}>
+      {boldText} {isExtIcon ? <LaunchIcon sx={{ mx: 0.5, fontSize: 16 }} /> : <AutoStoriesOutlinedIcon sx={{ mx: 0.5, fontSize: 16 }} />}
+    </Link>
+  );
+}

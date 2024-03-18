@@ -11,7 +11,7 @@ import { RenderMarkdownMemo } from '~/modules/blocks/markdown/RenderMarkdown';
 import { GoodTooltip } from '~/common/components/GoodTooltip';
 import { copyToClipboard } from '~/common/util/clipboardUtils';
 import { useFormEditTextArray } from '~/common/components/forms/useFormEditTextArray';
-import { useLLMSelect } from '~/common/components/forms/useLLMSelect';
+import { useLLMSelect, useLLMSelectLocalState } from '~/common/components/forms/useLLMSelect';
 import { useToggleableBoolean } from '~/common/util/useToggleableBoolean';
 
 import { FromText } from './FromText';
@@ -93,7 +93,8 @@ export function Creator(props: { display: boolean }) {
   const [showIntermediates, setShowIntermediates] = React.useState(false);
 
   // external state
-  const [personaLlm, llmComponent] = useLLMSelect(true, 'Persona Creation Model');
+  const [personaLlmId, setPersonaLlmId] = useLLMSelectLocalState(true);
+  const [personaLlm, llmComponent] = useLLMSelect(personaLlmId, setPersonaLlmId, 'Persona Creation Model');
 
 
   // editable prompts
@@ -220,7 +221,7 @@ export function Creator(props: { display: boolean }) {
         </Typography>
       </Box>
       <Box>
-        <Typography color='success' level='title-sm' sx={{ fontWeight: 600 }}>
+        <Typography color='success' level='title-sm' sx={{ fontWeight: 'lg' }}>
           {chainStepName}
         </Typography>
         <LinearProgress color='success' determinate value={Math.max(10, 100 * chainProgress)} sx={{ mt: 1.5 }} />

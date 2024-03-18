@@ -22,13 +22,12 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
   const advanced = useToggleableBoolean();
 
   // external state
-  const { source, sourceHasLLMs, access, updateSetup } =
+  const { source, sourceHasLLMs, access, hasNoBackendCap: needsUserKey, updateSetup } =
     useSourceSetup(props.sourceId, ModelVendorAnthropic);
 
   // derived state
   const { anthropicKey, anthropicHost, heliconeKey } = access;
 
-  const needsUserKey = !ModelVendorAnthropic.hasBackendCap?.();
   const keyValid = isValidAnthropicApiKey(anthropicKey);
   const keyError = (/*needsUserKey ||*/ !!anthropicKey) && !keyValid;
   const shallFetchSucceed = anthropicKey ? keyValid : (!needsUserKey || !!anthropicHost);
@@ -38,6 +37,12 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
     useLlmUpdateModels(ModelVendorAnthropic, access, !sourceHasLLMs && shallFetchSucceed, source);
 
   return <>
+
+    <Alert variant='soft' color='success'>
+      <div>
+        Note: <strong>Claude-3</strong> models are now supported.
+      </div>
+    </Alert>
 
     <FormInputKey
       id='anthropic-key' label={!!anthropicHost ? 'API Key' : 'Anthropic API Key'}
@@ -77,4 +82,5 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
     {isError && <InlineError error={error} />}
 
   </>;
+  ;
 }

@@ -8,7 +8,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import StayPrimaryLandscapeIcon from '@mui/icons-material/StayPrimaryLandscape';
 import StayPrimaryPortraitIcon from '@mui/icons-material/StayPrimaryPortrait';
 
-import { backendCaps } from '~/modules/backend/state-backend';
+import { backendCapabilities } from '~/modules/backend/store-backend-capabilities';
 
 import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { FormLabelStart } from '~/common/components/forms/FormLabelStart';
@@ -29,7 +29,7 @@ export function ProdiaSettings(props: { noSkipKey?: boolean }) {
   const advanced = useToggleableBoolean(false, 'ProdiaSettings');
 
   // external state
-  const backendHasProdia = backendCaps().hasImagingProdia;
+  const backendHasProdia = backendCapabilities().hasImagingProdia;
   const { apiKey, setApiKey, modelId, setModelId, modelGen, setModelGen, negativePrompt, setNegativePrompt, steps, setSteps, cfgScale, setCfgScale, prodiaAspectRatio, setProdiaAspectRatio, upscale, setUpscale, prodiaResolution, setProdiaResolution, seed, setSeed } = useProdiaStore(state => ({
     apiKey: state.prodiaApiKey, setApiKey: state.setProdiaApiKey,
     modelId: state.prodiaModelId, setModelId: state.setProdiaModelId,
@@ -102,7 +102,7 @@ export function ProdiaSettings(props: { noSkipKey?: boolean }) {
         }}
       >
         {!!modelsData && modelsData.models?.map((model, idx) => (
-          <Option key={'prodia-model-' + idx} value={model.id} sx={model.priority ? { fontWeight: 500 } : undefined}>
+          <Option key={'prodia-model-' + idx} value={model.id} sx={model.priority ? { fontWeight: 'md' } : undefined}>
             {model.gen === 'sdxl' && <Chip size='sm' variant='outlined'>XL</Chip>} {model.label}
           </Option>
         ))}

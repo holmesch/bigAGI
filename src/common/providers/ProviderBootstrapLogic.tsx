@@ -1,26 +1,35 @@
 import * as React from 'react';
+import { useRouter } from 'next/router';
 
-import { getIsMobile } from '~/common/components/useMatchMedia';
+import { markNewsAsSeen, shallRedirectToNews } from '../../apps/news/news.version';
+
+import { navigateToNews, ROUTE_APP_CHAT } from '~/common/app.routes';
 import { useNextLoadProgress } from '~/common/components/useNextLoadProgress';
 
 
 export function ProviderBootstrapLogic(props: { children: React.ReactNode }) {
 
-  // wire-up the NextJS router to a top-level loading bar - this will alleviate
-  // the perceived delay on the first 'backend' (provider) capabiliies load
-  useNextLoadProgress();
+  // external state
+  const { route, events } = useRouter();
 
-  // NOTE: just a pass-through for now. Will be used for the following:
-  //  - loading the latest news (see ChatPage -> useRedirectToNewsOnUpdates)
-  //  - loading the commander
-  //  - ...
+  // wire-up the NextJS router to a loading bar to be displayed while routes change
+  useNextLoadProgress(route, events);
 
-  // boot-up logic. this is not updated at route changes, but only at app startup
-  React.useEffect(() => {
-    if (getIsMobile()) {
-      // TODO: the app booted in mobile mode
+
+  // logic
+  const doRedirectToNews = (route === ROUTE_APP_CHAT) && shallRedirectToNews();
+
+
+  // redirect Chat -> News if fresh news
+  const isRedirecting = React.useMemo(() => {
+    if (doRedirectToNews) {
+      // the async is important (esp. on strict mode second pass)
+      navigateToNews().then(() => markNewsAsSeen());
+      return true;
     }
-  }, []);
+    return false;
+  }, [doRedirectToNews]);
 
-  return props.children;
+
+  return isRedirecting ? null : props.children;
 }
