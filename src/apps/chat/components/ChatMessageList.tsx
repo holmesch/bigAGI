@@ -87,6 +87,7 @@ export function ChatMessageList(props: {
   }, [conversationId, onConversationExecuteHistory]);
 
   const handleMessageBeam = React.useCallback(async (messageId: string) => {
+    // Right-click menu Beam
     if (!conversationId || !props.conversationHandler) return;
     const messages = getConversation(conversationId)?.messages;
     if (messages?.length) {
@@ -134,6 +135,10 @@ export function ChatMessageList(props: {
       userFlags: messageToggleUserFlag(message, userFlag),
     }), false);
   }, [conversationId, editMessage]);
+
+  const handleReplyTo = React.useCallback((_messageId: string, text: string) => {
+    props.conversationHandler?.getOverlayStore().getState().setReplyToText(text);
+  }, [props.conversationHandler]);
 
   const handleTextDiagram = React.useCallback(async (messageId: string, text: string) => {
     conversationId && onTextDiagram({ conversationId: conversationId, messageId, text });
@@ -275,9 +280,10 @@ export function ChatMessageList(props: {
               onMessageEdit={handleMessageEdit}
               onMessageToggleUserFlag={handleMessageToggleUserFlag}
               onMessageTruncate={handleMessageTruncate}
+              onReplyTo={handleReplyTo}
               onTextDiagram={handleTextDiagram}
-              onTextImagine={handleTextImagine}
-              onTextSpeak={handleTextSpeak}
+              onTextImagine={capabilityHasT2I ? handleTextImagine : undefined}
+              onTextSpeak={isSpeakable ? handleTextSpeak : undefined}
             />
 
           );
