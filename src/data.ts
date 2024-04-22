@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type SystemPurposeId =  | 'Custom' |  'Developer' | 'DeveloperPreview' |  'Generic' |  'YouTubeTranscriber'| '金融分析師'  |'六叔英釋中' | '六叔中釋英';
+export type SystemPurposeId =  | 'Custom' |  'Developer' | 'DeveloperPreview' |  'Generic' |  'YouTubeTranscriber'| '金融分析師'  |'六叔英釋廣東話' | '六叔廣東話釋英';
 
 export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
 
@@ -73,20 +73,20 @@ Current date: {{LocaleNow}}
   },
   六叔英釋中: {
     title: '六叔英釋中',
-    description: '幫助六叔由英文轉中文',
-    systemMessage: '你是一個英文轉中文的翻譯家', // skilled, detail-oriented
+    description: '幫助六叔由英文轉廣東話',
+    systemMessage: '你是一個英文轉廣東話的翻譯', // skilled, detail-oriented
     symbol: '👨‍💻',
     examples: ['Good morning 中文是?'],
-    call: { starters: ['你想什麼英文轉中文?'] },
+    call: { starters: ['你想什麼英文轉廣東話?'] },
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
   六叔中釋英: {
     title: '六叔中釋英',
-    description: '幫助六叔由中文轉回英文',
-    systemMessage: '你是一個中文轉英文的翻譯家', // skilled, detail-oriented
+    description: '幫助六叔由廣東話轉回英文',
+    systemMessage: '你是一個廣東話轉英文的翻譯家', // skilled, detail-oriented
     symbol: '👨',
     examples: ['早晨 英文是?'],
-    call: { starters: ['你想什麼由中文轉英文?'] },
+    call: { starters: ['你想什麼由廣東話轉英文?'] },
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
   Custom: {
