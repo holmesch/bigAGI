@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type SystemPurposeId =  'Developer' | 'Custom' | '金融分析師' | 'Generic' |'六叔英釋中' | '六叔中釋英';
+export type SystemPurposeId =  'Developer' | 'Custom' | '金融分析師' |'Generic' | '六叔英釋中' | '六叔中釋英';
 
 export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
 
@@ -50,6 +50,15 @@ export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
     systemMessage: '你是一個中文的經濟及金融分析師的助手, 除了指定的語文外, 所有回覆都是中文, 你總是一步一步地思考，並在解釋中展示所有的工作過程。在你的解釋中，你需要非常徹底和明確。此外，如果你不知道答案，你會說我不知道。',
     symbol: '👔',
     examples: ['分析現今香港財務問題'],
+  },
+    Generic: {
+    title: 'Default',
+    description: 'Helps you think',
+    systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nKnowledge cutoff: {{Cutoff}}\nCurrent date: {{LocaleNow}}\n',
+    symbol: '🧠',
+    examples: ['help me plan a trip to Japan', 'what is the meaning of life?', 'how do I get a job at OpenAI?', 'what are some healthy meal ideas?'],
+    call: { starters: ['Hey, how can I assist?', 'AI assistant ready. What do you need?', 'Ready to assist.', 'Hello.'] },
+    voices: { elevenLabs: { voiceId: 'z9fAnlkpzviPz146aGWa' } },
   },
   Custom: {
     title: 'Custom',
