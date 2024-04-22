@@ -72,7 +72,7 @@ Current date: {{LocaleNow}}
     examples: ['分析現今香港財務問題'],
   },
   六叔英釋中: {
-    title: '六叔英釋中',
+    title: '六叔英釋廣東話',
     description: '幫助六叔由英文轉廣東話',
     systemMessage: '你是一個英文轉廣東話的翻譯', // skilled, detail-oriented
     symbol: '👨‍💻',
@@ -81,7 +81,7 @@ Current date: {{LocaleNow}}
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
   },
   六叔中釋英: {
-    title: '六叔中釋英',
+    title: '六叔廣東話釋英',
     description: '幫助六叔由廣東話轉回英文',
     systemMessage: '你是一個廣東話轉英文的翻譯家', // skilled, detail-oriented
     symbol: '👨',
